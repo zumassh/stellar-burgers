@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
-import { getFeedsApi } from '../../utils/burger-api';
+import { getFeedsApi, getOrderByNumberApi } from '../../utils/burger-api';
 
 interface FeedState {
   orders: TOrder[];
@@ -8,6 +8,7 @@ interface FeedState {
   totalToday: number;
   loading: boolean;
   error: string | null;
+  currentOrder: TOrder | null;
 }
 
 const initialState: FeedState = {
@@ -15,7 +16,8 @@ const initialState: FeedState = {
   total: 0,
   totalToday: 0,
   loading: false,
-  error: null
+  error: null,
+  currentOrder: null
 };
 
 export const fetchFeeds = createAsyncThunk(
@@ -28,6 +30,18 @@ export const fetchFeeds = createAsyncThunk(
       return rejectWithValue(
         error.message || 'Ошибка при получении ленты заказов'
       );
+    }
+  }
+);
+
+export const getOrderByNumber = createAsyncThunk(
+  'feed/getOrderByNumber',
+  async (number: number, { rejectWithValue }) => {
+    try {
+      const response = await getOrderByNumberApi(number);
+      return response.orders[0];
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка при получении заказа');
     }
   }
 );
@@ -49,7 +63,8 @@ export const feedSlice = createSlice({
     selectFeedTotalToday: (state) => state.totalToday,
     selectFeedLoading: (state) => state.loading,
     selectFeedError: (state) => state.error,
-    selectFeedState: (state) => state
+    selectFeedState: (state) => state,
+    selectCurrentOrder: (state) => state.currentOrder
   },
   extraReducers: (builder) => {
     builder
@@ -66,6 +81,18 @@ export const feedSlice = createSlice({
       .addCase(fetchFeeds.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(getOrderByNumber.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getOrderByNumber.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentOrder = action.payload;
+      })
+      .addCase(getOrderByNumber.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   }
 });
@@ -78,7 +105,8 @@ export const {
   selectFeedTotalToday,
   selectFeedLoading,
   selectFeedError,
-  selectFeedState
+  selectFeedState,
+  selectCurrentOrder
 } = feedSlice.selectors;
 
 export default feedSlice;

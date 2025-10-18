@@ -18,11 +18,13 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate
+  useNavigate,
+  useMatch
 } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from '../../services/store';
 import { fetchUser } from '../../services/slices/authSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 import { Provider } from 'react-redux';
 import store from '../../services/store';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -31,6 +33,10 @@ const AppRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const profileMatch = useMatch('/profile/orders/:number')?.params.number;
+  const feedMatch = useMatch('/feed/:number')?.params.number;
+  const orderNumber = profileMatch || feedMatch;
 
   const state = location.state as {
     backgroundLocation?: Location;
@@ -44,6 +50,7 @@ const AppRoutes = () => {
 
   useEffect(() => {
     dispatch(fetchUser());
+    dispatch(fetchIngredients());
   }, [dispatch]);
 
   return (
@@ -51,8 +58,28 @@ const AppRoutes = () => {
       <Routes location={backgroundLocation || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
-        <Route path='/feed/:number' element={<OrderInfo />} />
-        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route
+          path='/feed/:number'
+          element={
+            <div>
+              <h1 className='text text_type_main-medium mt-2 mb-4'>
+                {orderNumber ? `#${String(orderNumber || '')}` : ''}
+              </h1>
+              <OrderInfo />
+            </div>
+          }
+        />
+        <Route
+          path='/ingredients/:id'
+          element={
+            <div>
+              <h1 className='text text_type_main-medium mt-2 mb-4'>
+                Детали ингредиента
+              </h1>
+              <IngredientDetails />
+            </div>
+          }
+        />
         <Route
           path='/login'
           element={
@@ -105,7 +132,12 @@ const AppRoutes = () => {
           path='/profile/orders/:number'
           element={
             <ProtectedRoute>
-              <OrderInfo />
+              <div>
+                <h1 className='text text_type_main-medium mt-2 mb-4'>
+                  {`#${String(orderNumber || '')}`}
+                </h1>
+                <OrderInfo />
+              </div>
             </ProtectedRoute>
           }
         />
@@ -117,7 +149,10 @@ const AppRoutes = () => {
           <Route
             path='/feed/:number'
             element={
-              <Modal title='order.number' onClose={closeModal}>
+              <Modal
+                title={`#${String(orderNumber || '')}`}
+                onClose={closeModal}
+              >
                 <OrderInfo />
               </Modal>
             }
@@ -125,7 +160,7 @@ const AppRoutes = () => {
           <Route
             path='/ingredients/:id'
             element={
-              <Modal title='ingredientsId' onClose={closeModal}>
+              <Modal title='Детали ингредиента' onClose={closeModal}>
                 <IngredientDetails />
               </Modal>
             }
@@ -134,7 +169,10 @@ const AppRoutes = () => {
             path='/profile/orders/:number'
             element={
               <ProtectedRoute>
-                <Modal title='orderNumber' onClose={closeModal}>
+                <Modal
+                  title={`#${String(orderNumber || '')}`}
+                  onClose={closeModal}
+                >
                   <OrderInfo />
                 </Modal>
               </ProtectedRoute>

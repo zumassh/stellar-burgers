@@ -137,6 +137,7 @@ const authSlice = createSlice({
         state.isAuthChecked = true;
         localStorage.removeItem('refreshToken');
         deleteCookie('accessToken');
+        localStorage.clear();
       })
       .addCase(updateUser.pending, (state) => {
         state.loading = true;
