@@ -37,7 +37,7 @@ describe('rootReducer', () => {
     });
 
     const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
-    
+
     const initialState = store.getState();
     expect(state).toEqual(initialState);
   });

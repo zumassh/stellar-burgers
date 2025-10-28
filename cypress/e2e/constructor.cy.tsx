@@ -15,17 +15,17 @@ describe('Конструктор бургеров - добавление инг�
 
     cy.visit('/');
     cy.wait(['@ingredientsApi', '@userApi']);
+    cy.get('[data-testid=ingredient-item]').as('ingredientItem');
   });
 
   it('Должен добавлять булку в конструктор', () => {
-    cy.get('[data-testid=ingredient-item]').should(
-      'have.length.greaterThan',
-      0
-    );
+    cy.get('@ingredientItem').should('have.length.greaterThan', 0);
 
-    cy.contains('[data-testid=ingredient-item]', 'Краторная булка N-200i')
-      .contains('button', 'Добавить')
-      .click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Краторная булка N-200i")')
+      .within(() => {
+        cy.get('button').contains('Добавить').click();
+      });
 
     cy.get('[data-testid=constructor-bun-bottom]')
       .should('contain', 'Краторная булка N-200i')
@@ -37,12 +37,11 @@ describe('Конструктор бургеров - добавление инг�
   });
 
   it('Должен добавлять начинку в конструктор', () => {
-    cy.contains(
-      '[data-testid=ingredient-item]',
-      'Биокотлета из марсианской Магнолии'
-    )
-      .contains('button', 'Добавить')
-      .click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Биокотлета из марсианской Магнолии")')
+      .within(() => {
+        cy.get('button').contains('Добавить').click();
+      });
 
     cy.get('[data-testid=constructor-fillings]').should(
       'contain',
@@ -68,23 +67,22 @@ describe('Конструктор бургеров - модальные окна'
 
     cy.visit('/');
     cy.wait(['@ingredientsApi', '@userApi']);
+    cy.get('[data-testid=ingredient-item]').as('ingredientItem');
   });
 
   it('Открытие модального окна при клике', () => {
-    cy.contains(
-      '[data-testid=ingredient-item]',
-      'Краторная булка N-200i'
-    ).click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Краторная булка N-200i")')
+      .click();
 
     cy.get('[data-testid=modal]').should('be.visible');
     cy.get('[data-testid=modal-title]').should('contain', 'Детали ингредиента');
   });
 
   it('Закрытие модального окна по кнопке', () => {
-    cy.contains(
-      '[data-testid=ingredient-item]',
-      'Краторная булка N-200i'
-    ).click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Краторная булка N-200i")')
+      .click();
 
     cy.get('[data-testid=modal]').should('be.visible');
 
@@ -94,10 +92,9 @@ describe('Конструктор бургеров - модальные окна'
   });
 
   it('Закрытие модального окна по оверлею', () => {
-    cy.contains(
-      '[data-testid=ingredient-item]',
-      'Краторная булка N-200i'
-    ).click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Краторная булка N-200i")')
+      .click();
 
     cy.get('[data-testid=modal]').should('be.visible');
 
@@ -138,19 +135,21 @@ describe('Создание заказа', () => {
 
     cy.visit('/');
     cy.wait(['@ingredientsApi', '@userApi']);
+    cy.get('[data-testid=ingredient-item]').as('ingredientItem');
   });
 
   it('Оформление заказа и очищение конструктора', () => {
-    cy.contains('[data-testid=ingredient-item]', 'Краторная булка N-200i')
-      .contains('button', 'Добавить')
-      .click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Краторная булка N-200i")')
+      .within(() => {
+        cy.get('button').contains('Добавить').click();
+      });
 
-    cy.contains(
-      '[data-testid=ingredient-item]',
-      'Биокотлета из марсианской Магнолии'
-    )
-      .contains('button', 'Добавить')
-      .click();
+    cy.get('@ingredientItem')
+      .filter(':contains("Биокотлета из марсианской Магнолии")')
+      .within(() => {
+        cy.get('button').contains('Добавить').click();
+      });
 
     cy.get('[data-testid=constructor-bun-top]').should(
       'contain',
